@@ -2,25 +2,27 @@ start
   = mainFunction / statement+
 
 statement
-  = function
+  =  mainFunction
+  / function 
   / assignment
   / print
   / forLoop
   / ifStatement
+  / call
 
 mainFunction
-  = def:def _ main:main _ openParen:openParen _ closeParen:closeParen _ openBrace:openBrace _ statements:statement* _ closeBrace:closeBrace { return { type: 'mainFunction', def, main, openParen, closeParen, openBrace, statements: statements[0], closeBrace }; }
+  = def:def __ main:main _ openParen:openParen _ closeParen:closeParen _ openBrace:openBrace _ statements:statement* _ closeBrace:closeBrace { return { type: 'mainFunction', def, main, openParen, closeParen, openBrace, statements: statements, closeBrace }; }
 
 ifStatement
-  = ifs:if  _ condition:condition _ openBrace:openBrace _ ifStatements:statement* _ closeBrace:closeBrace _ elseClause:(elses:else _ bracket:openBrace _ elseStatements:statement* _ bracketC:closeBrace {return {elses, bracket, elseStatements, bracketC}})? {
-    return { type: 'ifStatement', ifs, condition, openBrace, ifStatements: ifStatements[0], closeBrace, elseClause: elseClause ? elseClause : null };
+  = ifs:if  __ condition:condition _ openBrace:openBrace _ ifStatements:statement* _ closeBrace:closeBrace _ elseClause:(elses:else _ bracket:openBrace _ elseStatements:statement* _ bracketC:closeBrace {return {elses, bracket, elseStatements, bracketC}})? {
+    return { type: 'ifStatement', ifs, condition, openBrace, ifStatements: ifStatements, closeBrace, elseClause: elseClause ? elseClause : null };
   }
 
 condition
-  = variable:variable _ operator:conditional _ value:value { return { variable, operator, value }; }
+  = left:value _ operator:conditional _ right:value { return {left, operator, right}; }
 
 forLoop
-  = forL:forL _ variable:variable _ ini:in _ openParen:openParen _ range:range _ closeParen:closeParen _ openBrace:openBrace _ statements:statement* _ closeBrace:closeBrace {
+  = forL:forL __ variable:value _ ini:in _ openParen:openParen _ range:range _ closeParen:closeParen _ openBrace:openBrace _ statements:statement* _ closeBrace:closeBrace {
     return { type: 'forLoop', forL, variable, ini, openParen, range, closeParen, openBrace, statements: statements, closeBrace};
   }
 
@@ -28,7 +30,7 @@ range
   = start:number _ come:come _ end:number { return { start, come, end }; }
 
 function
-  = def:def _ name:variable _ openParen:openParen _ params:variable? _ closeParen:closeParen _ openBrace:openBrace _ statements:statement* _ closeBrace:closeBrace { return { type: 'function', def, name, openParen, params, closeParen, openBrace, statements: statements[0], closeBrace }; }
+  = def:def __ name:variable _ openParen:openParen _ params:variable? _ closeParen:closeParen _ openBrace:openBrace _ statements:statement* _ closeBrace:closeBrace { return { type: 'function', def, name, openParen, params, closeParen, openBrace, statements: statements, closeBrace }; }
 
 assignment
   = variable:variable _ arrow:arrow _ value:value { return { type: 'assignment', variable, arrow, value }; }
@@ -37,6 +39,9 @@ print
   = mostrarlo:mostrarlo _ openParen:openParen _ args:args _ closeParen:closeParen { 
     return { type: 'print', mostrarlo, openParen, value: args, closeParen }; 
   }
+
+call
+  = variable:variable _ openParen:openParen _ params:value? _ closeParen:closeParen {return {type: 'call', variable, openParen, params, closeParen }; }
 
 main
   = "main"
@@ -82,6 +87,9 @@ closeBrace
 
 _ "whitespace"
   = [ \t\n\r]*
+
+__ "requiredws"
+  = [ \t\n\r]+
 
 value
   = number

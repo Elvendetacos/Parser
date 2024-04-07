@@ -9,7 +9,13 @@
     <div class="juan">
             <textarea id="input" type="text" placeholder="Escriba aquí..."></textarea>
                 <button id="parseButton"></button>
-        <pre id="output"></pre>
+        <div class="mario">
+            <pre id="outputLexer"></pre>
+            <div class="container">
+                <p>Consola: </p>
+                <pre id="outputConsole"></pre>
+            </div>
+        </div>
     </div>
         
         <script>
@@ -20,11 +26,13 @@
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({ data: input }),
-                    success: function(result) {
-                        $('#output').text(JSON.stringify(result, null, 2));
+                    success: function(response) {
+                        console.log(response);
+                        $('#outputLexer').text(JSON.stringify(response.result, null, 2));
+                        $('#outputConsole').text(response.output)
                     },
                     error: function(error) {
-                        $('#output').text(error.responseJSON.error);
+                        $('#outputLexer').text(error.responseJSON.error);
                     }
                 });
             });
